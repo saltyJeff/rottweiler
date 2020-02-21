@@ -1,20 +1,21 @@
 //
-// Created by jeffe on 2/19/2020.
+// Created by saltyJeff on 2/19/2020.
 //
 
 #include "GreenHeron.h"
 #include <stdexcept>
 #include <spdlog/spdlog.h>
+#include "RotErrs.h"
 GreenHeron::GreenHeron(std::string &azFile, std::string &elFile, int baudRate) {
 	azRotor.SetBaudRate(static_cast<BaudRate>(baudRate));
 	elRotor.SetBaudRate(static_cast<BaudRate>(baudRate));
 	azRotor.Open(azFile);
 	elRotor.Open(elFile);
 	if(!azRotor.IsOpen()) {
-		throw std::runtime_error("Could not open azimuth rotor");
+		throw RotErr(RIG_ERRORS::RIG_ECONF, "Could not open azimuth rotor");
 	}
 	if(!elRotor.IsOpen()) {
-		throw std::runtime_error("Could not open elevation rotor");
+		throw RotErr(RIG_ERRORS::RIG_ECONF, "Could not open elevation rotor");
 	}
 }
 void GreenHeron::setPosition(RotCoord &coords) {
@@ -27,17 +28,20 @@ void GreenHeron::setPosition(RotCoord &coords) {
 RotCoord GreenHeron::getPosition() {
 	azRotor.Write(getCmd);
 	elRotor.Write(getCmd);
-	std::string azRead = "TIMEOUT";
-	std::string elRead = "TIMEOUT";
-	azRotor.Read(azRead, 4);
-	elRotor.Read(elRead, 4);
-	if(azRead == "TIMEOUT" || elRead == "TIMEOUT") {
-		spdlog::error("Timeout when reading from the green heron. Rotor is now in undefined state");
+	std::string azRead;
+	std::string elRead;
+	try {
+		azRotor.Read(azRead, 4, ROTOR_TIMEOUT);
+		elRotor.Read(elRead, 4, ROTOR_TIMEOUT);
+		int az, el;
+		sscanf(azRead.c_str(), "%d;", &az);
+		sscanf(elRead.c_str(), "%d;", &el);
+		return RotCoord(az, el);
 	}
-	int az, el;
-	sscanf(azRead.c_str(), "%d;", &az);
-	sscanf(elRead.c_str(), "%d;", &el);
-	return RotCoord(az, el);
+	catch(ReadTimeout &e) {
+		spdlog::error(std::string("Timeout while reading from rotor: ") + e.what());
+		throw RotErr(RIG_ERRORS::RIG_ETIMEOUT, std::string("Timeout while reading position from rotor") + e.what());
+	}
 }
 void GreenHeron::stop() {
 	azRotor.Write(stopCmd);

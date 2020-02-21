@@ -1,5 +1,5 @@
 //
-// Created by jeffe on 2/19/2020.
+// Created by saltyJeff on 2/19/2020.
 //
 
 #ifndef ROTTWEILER_GREENHERON_H
@@ -9,6 +9,9 @@
 #include "Rotor.h"
 #include <string>
 #include <libserial/SerialPort.h>
+
+const int ROTOR_TIMEOUT = 2 * 1000;
+
 using namespace LibSerial;
 class GreenHeron: public Rotor {
 public:
@@ -19,8 +22,7 @@ public:
 	RotCoord getPosition() override;
 	void stop() override;
 private:
-	std::string posCmd(int val);
-	bool safeCoords(RotCoord &coords);
+	static std::string posCmd(int val);
 	const std::string getCmd = "AI1;";
 	const std::string stopCmd = ";";
 };

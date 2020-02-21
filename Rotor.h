@@ -1,5 +1,5 @@
 //
-// Created by jeffe on 2/19/2020.
+// Created by saltyJeff on 2/19/2020.
 //
 
 #ifndef ROTTWEILER_ROTOR_H

@@ -15,5 +15,6 @@ public:
 	bool test = false;
 	float azOffset = 0;
 	float elOffset = 0;
+	bool compatMode = false;
     RotArgs(int argc, char** argv);
 };

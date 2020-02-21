@@ -1,27 +1,20 @@
 //
-// Created by jeffe on 2/18/2020.
+// Created by saltyJeff on 2/18/2020.
 //
 
 #include "RotCoord.h"
 #include <cmath>
 #include <sstream>
-#include <stdexcept>
-
-double deg2rad (double degrees) {
-	return (degrees / 360) * 2 * M_PI;
-}
-double rad2deg (double rads) {
-	return (rads / 2 / M_PI) * 360;
-}
+#include "RotErrs.h"
 
 RotCoord::RotCoord(int az, int el) {
 	this->az = az;
 	this->el = el;
 	if(az < 0 || az > 360) {
-		throw std::runtime_error("Azimuth is out of bounds");
+		throw RotErr(RIG_ERRORS::RIG_EINVAL, "Azimuth is out of bounds");
 	}
 	if(el < 0 || el > 180) {
-		throw std::runtime_error("Elevation is out of bounds");
+		throw RotErr(RIG_ERRORS::RIG_EINVAL, "Elevation is out of bounds");
 	}
 }
 RotCoord RotCoord::operator+(const RotCoord &other) const {

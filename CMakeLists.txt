@@ -8,10 +8,15 @@ add_subdirectory(spdlog)
 add_subdirectory(sockpp)
 add_subdirectory(libserial)
 
-add_executable(rottweiler main.cpp RotArgs.cpp RotArgs.h RotCoord.cpp RotCoord.h GreenHeron.cpp GreenHeron.h RotCmd.cpp RotCmd.h tests/test_rotcmd.cpp tests/tests.h Rotor.h DummyRotor.cpp DummyRotor.h RottweilerServer.cpp RottweilerServer.h RottweilerClient.cpp RottweilerClient.h)
+add_library(rottweiler_lib RotArgs.cpp RotArgs.h RotCoord.cpp RotCoord.h GreenHeron.cpp GreenHeron.h RotCmd.cpp RotCmd.h Rotor.h DummyRotor.cpp DummyRotor.h RottweilerServer.cpp RottweilerServer.h RottweilerClient.cpp RottweilerClient.h RotErrs.h)
+add_executable(rottweiler main.cpp)
 set_target_properties(rottweiler PROPERTIES OUTPUT_NAME "rottweilerd")
-target_link_libraries(rottweiler spdlog::spdlog sockpp_lib serial_lib)
-add_compile_options(-g)
+target_link_libraries(rottweiler_lib spdlog::spdlog sockpp_lib serial_lib)
+target_link_libraries(rottweiler rottweiler_lib)
 
 enable_testing()
+add_executable(rottweiler-test tests/main.cpp tests/test_rotcmd.cpp tests/tests.h)
+target_link_libraries(rottweiler-test rottweiler_lib)
 add_test(NAME rottweiler_tests COMMAND "rottweilerd --test")
+
+add_compile_options(-g)

@@ -1,12 +1,12 @@
 //
-// Created by jeffe on 2/18/2020.
+// Created by saltyJeff on 2/18/2020.
 //
 
 #ifndef ROTTWEILER_ROTCOORD_H
 #define ROTTWEILER_ROTCOORD_H
 #include <string>
 #include <utility>
-
+#include <cmath>
 class RotCoord {
 public:
 	int az;
@@ -24,5 +24,11 @@ public:
 	explicit operator std::pair<int, int>() const;
 };
 
+inline double deg2rad (double degrees) {
+	return (degrees / 360) * 2 * M_PI;
+}
+inline double rad2deg (double rads) {
+	return (rads / 2 / M_PI) * 360;
+}
 
 #endif //ROTTWEILER_ROTCOORD_H

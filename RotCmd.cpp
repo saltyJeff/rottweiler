@@ -1,37 +1,37 @@
 //
-// Created by jeffe on 2/19/2020.
+// Created by saltyJeff on 2/19/2020.
 //
 
 #include "RotCmd.h"
 #include <stdexcept>
 #include <sstream>
+#include "RotErrs.h"
+
 RotCmd::RotCmd(std::string &cmdStr) {
 	this->cmdStr = cmdStr;
 	std::istringstream cmdStream(cmdStr);
-	char c;
+	std::string c;
 	cmdStream >> c;
-	switch(c) {
-	case 'p':
+	if(c == "get_pos" || c == "p") {
 		cmd = CMD::GET_POS;
-		break;
-	case 'P':
+	}
+	else if(c == "set_pos" || c == "P") {
 		cmd = CMD::SET_POS;
-		break;
-	case 'S':
+	}
+	else if(c == "stop" || c == "S") {
 		cmd = CMD::STOP;
-		break;
-	case 'q':
+	}
+	else if(c == "quit" || c == "q") {
 		cmd = CMD::QUIT;
-		break;
-	default:
+	}
+	else {
 		cmd = CMD::UNKNOWN;
-		break;
 	}
 	if(cmd == CMD::SET_POS) {
 		float az;
 		float el;
 		if(!(cmdStream >> az) || !(cmdStream >> el)) {
-			throw std::runtime_error("Missing azimuth and elevation parameters");
+			throw RotErr(RIG_ERRORS::RIG_EINVAL, "Missing azimuth or elevation parameters");
 		}
 		coords = new RotCoord((int)az, (int)el);
 	}

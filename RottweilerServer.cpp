@@ -1,5 +1,5 @@
 //
-// Created by jeffe on 2/20/2020.
+// Created by saltyJeff on 2/20/2020.
 //
 
 #include "RottweilerServer.h"
@@ -7,7 +7,9 @@
 #include <spdlog/spdlog.h>
 #include <stdexcept>
 class RottweilerClient;
-RottweilerServer::RottweilerServer(Rotor *rotor, int portNum): rotor(rotor) {
+RottweilerServer::RottweilerServer(Rotor *rotor, int portNum, bool compatMode): rotor(rotor) {
+	this->compatMode = compatMode;
+	spdlog::info("Executing in rotctld compatibility mode: {}", compatMode);
 	bool ok = acceptor.open(portNum);
 	if(!ok) {
 		spdlog::error("Could not open socket! {}", acceptor.last_error_str());
@@ -20,6 +22,7 @@ void RottweilerServer::listen(bool *die) {
 	while(!(*die)) {
 		tick();
 	}
+	spdlog::info("Listening loop broken");
 }
 void RottweilerServer::tick() {
 	auto i = std::begin(clients);
@@ -38,14 +41,16 @@ void RottweilerServer::tick() {
 	inet_address peer;
 	tcp_socket sock = acceptor.accept(&peer);
 	if(sock) {
-		clients.push_back(new RottweilerClient(sock.clone(), this));
+		clients.push_back(new RottweilerClient(sock.clone(), this, compatMode));
 	}
 }
 RottweilerServer::~RottweilerServer() {
+	spdlog::debug("Closing still alive clients");
 	for(RottweilerClient *client : clients) {
 		delete client;
 	}
 	clients.clear();
+	spdlog::debug("Closing sockets");
 	acceptor.close();
-	spdlog::info("Server closed");
+	spdlog::debug("Server closed");
 }

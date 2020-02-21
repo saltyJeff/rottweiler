@@ -22,7 +22,7 @@ int runMain(int argc, char **argv) {
 	}
 	spdlog::info("Rotor established");
 	signal(SIGINT, segfaultCatcher);
-	RottweilerServer server(rotor, args.portNum);
+	RottweilerServer server(rotor, args.portNum, args.compatMode);
 	server.listen(&die);
 	delete rotor;
 	return 0;

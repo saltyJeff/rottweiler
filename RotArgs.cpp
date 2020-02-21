@@ -11,6 +11,7 @@ struct option long_options[] = {
     {"set-azoffset", required_argument, 0, 'o'},
     {"set-eloffset", required_argument, 0, 'O'},
     {"verbose", no_argument, 0, 'v'},
+    {"compat", no_argument, 0, 'C'},
     {"help", no_argument, 0, 'h'},
     {"version",no_argument, 0, 'V'},
     {0, 0, 0, 0}
@@ -54,6 +55,9 @@ RotArgs::RotArgs(int argc, char** argv) {
         case 'S':
 	        test = true;
 	        break;
+        case 'C':
+	        compatMode = true;
+        	break;
         case '?':
 	        exit(1);
         }
