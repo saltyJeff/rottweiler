@@ -17,6 +17,6 @@ target_link_libraries(rottweiler rottweiler_lib)
 enable_testing()
 add_executable(rottweiler-test tests/main.cpp tests/test_rotcmd.cpp tests/tests.h)
 target_link_libraries(rottweiler-test rottweiler_lib)
-add_test(NAME rottweiler_tests COMMAND "rottweilerd --test")
+add_test(rottweiler-tests rottweiler-test)
 
 add_compile_options(-g)
