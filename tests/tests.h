@@ -1,11 +1,11 @@
 //
-// Created by jeffe on 2/19/2020.
+// Created by saltyJeff on 2/19/2020.
 //
 
 #ifndef ROTTWEILER_TESTS_H
 #define ROTTWEILER_TESTS_H
-#include <snowhouse/snowhouse.h>
-using namespace snowhouse;
+#include "catch.hpp"
+
 void testRotCmd();
 
 inline void runTests() {
