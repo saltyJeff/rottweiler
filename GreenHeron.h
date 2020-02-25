@@ -23,8 +23,10 @@ public:
 	void stop() override;
 private:
 	static std::string posCmd(int val);
-	const std::string getCmd = "AI1;";
+	const std::string getCmd = "R11;";
 	const std::string stopCmd = ";";
+	bool isBusy = false;
+	void checkBusy();
 };
 
 

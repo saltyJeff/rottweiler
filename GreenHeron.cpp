@@ -5,6 +5,7 @@
 #include "GreenHeron.h"
 #include <stdexcept>
 #include <spdlog/spdlog.h>
+#include <sstream>
 #include "RotErrs.h"
 GreenHeron::GreenHeron(std::string &azFile, std::string &elFile, int baudRate) {
 	azRotor.SetBaudRate(static_cast<BaudRate>(baudRate));
@@ -19,6 +20,7 @@ GreenHeron::GreenHeron(std::string &azFile, std::string &elFile, int baudRate) {
 	}
 }
 void GreenHeron::setPosition(RotCoord &coords) {
+	checkBusy();
 	std::string azCmd = posCmd(coords.az);
 	std::string elCmd = posCmd(coords.el);
 
@@ -34,8 +36,14 @@ RotCoord GreenHeron::getPosition() {
 		azRotor.Read(azRead, 4, ROTOR_TIMEOUT);
 		elRotor.Read(elRead, 4, ROTOR_TIMEOUT);
 		int az, el;
-		sscanf(azRead.c_str(), "%d;", &az);
-		sscanf(elRead.c_str(), "%d;", &el);
+		int azBusy, elBusy;
+		std::istringstream azStream (azRead);
+		std::istringstream elStream (elRead);
+		azStream >> az;
+		azStream >> azBusy;
+		elStream >> el;
+		elStream >> elBusy;
+		isBusy = azBusy == 1 || elBusy == 1;
 		return RotCoord(az, el);
 	}
 	catch(ReadTimeout &e) {
@@ -51,4 +59,14 @@ char commandBuffer[255];
 std::string GreenHeron::posCmd(int val) {
 	sprintf(commandBuffer, "AP1%03d\r;", val);
 	return std::string(commandBuffer);
+}
+
+void GreenHeron::checkBusy() {
+	if(!isBusy) {
+		return;
+	}
+	getPosition();
+	if(isBusy) {
+		throw RotErr(RIG_ERRORS::RIG_BUSBUSY, std::string("Rotor is still moving"));
+	}
 }
