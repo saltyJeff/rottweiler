@@ -33,25 +33,41 @@ RotCoord GreenHeron::getPosition() {
 	std::string azRead;
 	std::string elRead;
 	try {
-		azRotor.Read(azRead, 4, ROTOR_TIMEOUT);
-		elRotor.Read(elRead, 4, ROTOR_TIMEOUT);
-		int az, el;
-		int azBusy, elBusy;
-		char throwaway;
-		std::istringstream azStream (azRead);
-		std::istringstream elStream (elRead);
-		// structure of a message: SOH ascii0 NULL|SOH ascii> %3d value;
-		azStream >> az;
-		azStream >> azBusy;
-		elStream >> el;
-		elStream >> elBusy;
-		isBusy = azBusy == 1 || elBusy == 1;
-		return RotCoord(az, el);
+		azRotor.ReadLine(azRead, ';', ROTOR_TIMEOUT);		
+		elRotor.ReadLine(elRead, ';', ROTOR_TIMEOUT);
+		
+		std::pair<float, bool> azRes = readGetResponse(azRotor);
+		std::pair<float, bool> elRes = readGetResponse(elRotor);
+
+		isBusy = azRes.second || elRes.second;
+		return RotCoord(azRes.first, elRes.first);
 	}
 	catch(ReadTimeout &e) {
 		spdlog::error(std::string("Timeout while reading from rotor: ") + e.what());
 		throw RotErr(RIG_ERRORS::RIG_ETIMEOUT, std::string("Timeout while reading position from rotor") + e.what());
 	}
+}
+// structure of a message: SOH ascii0 NULL|SOH ascii> %3d value;
+std::pair<float, bool> GreenHeron::readGetResponse(SerialPort &rotor) {
+	std::string resLine;
+	rotor.ReadLine(resLine, ';', ROTOR_TIMEOUT);
+	char c; // throwaway
+	int i; // throwaway
+
+	float heading;
+	bool busy;
+	std::istringstream stream(resLine);
+	stream >> c; // get rid of SOH
+	stream >> i; // always 0
+	stream >> c; // SOH or NULL
+	busy = c == 1;
+	stream >> c; // get rid of >
+	stream >> heading;
+
+	if(stream.fail()) {
+		throw RotErr(RIG_ERRORS::RIG_ERJCTED, std::string("Response data non-conformant: ")+resLine);
+	}
+	return std::make_pair(heading, busy);
 }
 void GreenHeron::stop() {
 	azRotor.Write(stopCmd);
@@ -62,7 +78,6 @@ std::string GreenHeron::posCmd(int val) {
 	sprintf(commandBuffer, "AP1%03d\r;", val);
 	return std::string(commandBuffer);
 }
-
 void GreenHeron::checkBusy() {
 	if(!isBusy) {
 		return;

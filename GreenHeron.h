@@ -8,6 +8,7 @@
 
 #include "Rotor.h"
 #include <string>
+#include <utility>
 #include <libserial/SerialPort.h>
 
 const int ROTOR_TIMEOUT = 2 * 1000;
@@ -27,6 +28,7 @@ private:
 	const std::string stopCmd = ";";
 	bool isBusy = false;
 	void checkBusy();
+	std::pair<float, bool> readGetResponse(SerialPort &rotor);
 };
 
 
