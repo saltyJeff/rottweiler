@@ -37,8 +37,10 @@ RotCoord GreenHeron::getPosition() {
 		elRotor.Read(elRead, 4, ROTOR_TIMEOUT);
 		int az, el;
 		int azBusy, elBusy;
+		char throwaway;
 		std::istringstream azStream (azRead);
 		std::istringstream elStream (elRead);
+		// structure of a message: SOH ascii0 NULL|SOH ascii> %3d value;
 		azStream >> az;
 		azStream >> azBusy;
 		elStream >> el;
